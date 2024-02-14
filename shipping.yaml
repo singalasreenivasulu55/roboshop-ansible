@@ -64,3 +64,9 @@
   - name: load cities data
     ansible.builtin.shell: "mysql -h mysql.daws86s.online -uroot -p{{mysql_password}}  < /app/schema/shipping.sql"
     when: schema.stdout != "1"
+
+  - name: start and enable shipping
+    ansible.builtin.service:
+      name: shipping
+      state: restarted
+      enabled: yes
