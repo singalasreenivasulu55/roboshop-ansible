@@ -5,21 +5,26 @@
   - name: disable old nodejs and enable nodejs
     ansible.builtin.shell: dnf module disable nodejs -y ; dnf module enable nodejs:18 -y
 
-  - name:  Install nodejs
+  - name: Install nodejs
     ansible.builtin.dnf:
-      name: nodejs
+      name: nodejs 
       state: present
 
   - name: create roboshop user
     ansible.builtin.user:
       name: roboshop
 
-  - name: Recursively reomove app directory
+  - name: Recursively remove app directory
+    ansible.builtin.file:
+      path: /app
+      state: absent
+
+  - name: create app directory
     ansible.builtin.file:
       path: /app
       state: directory
 
-  - name: Download user application
+  - name: download user application
     ansible.builtin.get_url:
       url: https://roboshop-builds.s3.amazonaws.com/user.zip
       dest: /tmp
@@ -40,9 +45,11 @@
       src: user.service
       dest: /etc/systemd/system/user.service
 
-  - name: daemon reload and start
+  - name: deamon realod and start
     ansible.builtin.systemd_service:
       daemon_reload: true
+
+  # let's start after the data is loaded
 
   - name: Copy mongodb repo
     ansible.builtin.copy:
@@ -54,7 +61,7 @@
       name: mongodb-org-shell
       state: present
 
-  - name: get the user count
+  - name: get the users count
     ansible.builtin.command:  mongo --host mongodb.daws86s.online --quiet --eval 'db = db.getSiblingDB("users"); db.users.count()'
     register: user_count
 
